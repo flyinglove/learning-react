@@ -1,0 +1,122 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="../react.js"></script>
+	<script src="../react-dom.js"></script>
+	<script src="../babel.min.js"></script>
+</head>
+<body>
+	<div id="root"></div>
+	<script type="text/babel">
+		const data = [
+		  {category: "Sporting Goods", price: "$49.99", stocked: true, name: "Football"},
+		  {category: "Sporting Goods", price: "$9.99", stocked: true, name: "Baseball"},
+		  {category: "Sporting Goods", price: "$29.99", stocked: false, name: "Basketball"},
+		  {category: "Electronics", price: "$99.99", stocked: true, name: "iPod Touch"},
+		  {category: "Electronics", price: "$399.99", stocked: false, name: "iPhone 5"},
+		  {category: "Electronics", price: "$199.99", stocked: true, name: "Nexus 7"}
+		];
+		class FilterableProductTable extends React.Component {
+			constructor(props) {
+				super(props)
+				this.state = {
+					filterText: '',
+					isStockOnly: false
+				}
+			}
+			handleTextChange = (e) => {
+				this.setState({filterText: e.target.value})
+			}
+			handleBoxChange = (e) => {
+				//console.log(e)
+				this.setState({isStockOnly: e.target.checked})
+			}
+			render() {
+				const catesArr = []
+				let data = []
+				console.log(this.state.isStockOnly)
+				if (this.state.isStockOnly) {
+					console.log(23)
+					data = this.props.data.filter((item) => {
+						return item.stocked == true
+					})
+				} else {
+					data = this.props.data
+				}
+				console.log(data)
+				if(this.state.filterText){
+					 data = data.filter((item) => {
+						console.log(item.name, this.state.filterText, item.name.indexOf(this.state.filterText))
+						return item.name.indexOf(this.state.filterText) >= 0
+					})
+				}
+				for(let i = 0; i < data.length; i++) {
+					if (catesArr.indexOf(data[i].category) >= 0 ) {
+						continue;
+					} 
+					catesArr.push(data[i].category)	
+				}
+				return (
+					<div>
+						<SearchBar onHandleChange={this.handleTextChange} onHandleBoxChange={this.handleBoxChange}/>
+					<ProductTable data={data} cates={catesArr} />
+					</div>
+				)
+			}
+		}
+		function SearchBar(props){
+
+			return (
+				<form>
+					<input type="text" onChange={props.onHandleChange} />
+					<label>
+						Only Show Products in stock:
+						<input type="checkbox" onChange={props.onHandleBoxChange}/>
+					</label>
+				</form>
+			)
+		}
+		function ProductTable(props){
+			const cateArr = props.cates
+			const itemArr = []
+			console.log(props.data)
+			for(let i = 0; i < cateArr.length; i++) {
+				const itemType = <ProductCategoryRow key={cateArr[i]} category={cateArr[i]} />
+				itemArr.push(itemType)
+				for (let k of props.data) {
+					if (k.category === cateArr[i]) {
+						const itemArr2 = <ProductRow key={k.name} name={k.name} price={k.price} />
+						itemArr.push(itemArr2)
+					}
+				}
+			}
+			return (
+				<table>
+					<tbody>
+						{itemArr}
+					</tbody>
+				</table>
+			)
+		}
+		function ProductCategoryRow(props){
+			//console.log(props)
+			return (
+				<tr>
+					<th colSpan="2">{props.category}</th>
+				</tr>
+			)
+		}
+		function ProductRow(props){
+			return (
+				<tr>
+					<td>{props.name}</td>
+					<td>{props.price}</td>
+				</tr>
+			)
+		}
+		ReactDOM.render(<FilterableProductTable data = {data} />, document.getElementById('root'))
+	</script>
+</body>
+</html>
